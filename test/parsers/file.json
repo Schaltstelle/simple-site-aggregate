@@ -1,0 +1,13 @@
+{
+  "selectors": {
+    "content": "div.content",
+    "date": [
+      "parseDate",
+      "span [date]",
+      "DD.MM.YYYY"
+    ]
+  },
+  "static": {
+    "stat": "static"
+  }
+}

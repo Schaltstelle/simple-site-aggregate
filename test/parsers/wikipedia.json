@@ -1,0 +1,9 @@
+{
+  "selectors": {
+    "content": "span.mw-headline"
+  },
+  "static": {
+    "stat": "wikipedia",
+    "date":"2017-06-07"
+  }
+}

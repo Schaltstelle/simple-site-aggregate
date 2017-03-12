@@ -32,7 +32,7 @@ function run(url, parser, templ, maxLen) {
 }
 
 function doRun(url, parser, templ, maxLen, config) {
-    let cacheDir='_work';
+    let cacheDir = '_work';
     fse.mkdirsSync(cacheDir);
     const templateFile = fs.readFileSync(templ, 'utf8');
     debug('Searching', chalk.blue(url));
@@ -120,16 +120,21 @@ function parseFunc(func, data, params) {
 function extract(addr, tags, selector, maxLen) {
     let elem = /(.*?) \[(.*?)]$/.exec(selector);
     if (elem) {
-        let tag = tags(elem[1]);
+        let css = elem[1];
+        let attr = elem[2];
+        let tag = tags(css);
         if (tag.length === 0) {
-            debug(chalk.red('tag "' + elem[1] + '" not found.'));
+            debug(chalk.red('tag "' + css + '" not found.'));
             return '';
         }
-        let attr = tag.attr(elem[2]);
-        if (tag.get(0).tagName === 'img' && elem[2] === 'src') {
-            attr = relative(attr, addr);
+        if (attr.charAt(0) === '.') {
+            return tag.hasClass(attr.substring(1));
         }
-        return attr;
+        let val = tag.attr(attr);
+        if (tag.get(0).tagName === 'img' && attr === 'src') {
+            val = relative(val, addr);
+        }
+        return val;
     }
     return convertToHtml(addr, tags(selector), maxLen);
 }

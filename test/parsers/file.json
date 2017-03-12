@@ -1,6 +1,7 @@
 {
   "selectors": {
     "content": "div.content",
+    "isMore":"div.content [.more]",
     "date": [
       "parseDate",
       "span [date]",

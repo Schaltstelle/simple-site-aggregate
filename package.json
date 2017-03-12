@@ -2,7 +2,7 @@
   "name": "simple-site-aggregate",
   "description": "Aggregator plugin for simple-site.",
   "license": "Apache-2.0",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": false,
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
     "fs-extra": "2.0.0",
     "moment": "2.17.1",
     "request": "2.81.0",
-    "simple-site": "^0.1.1"
+    "simple-site": "^0.1.2"
   },
   "devDependencies": {
     "istanbul": "0.4.5",

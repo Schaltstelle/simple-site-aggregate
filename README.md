@@ -38,10 +38,14 @@ Aggregate a page using a handlebars tag:
 ```
 
 The values in `selectors` are CSS selectors that are applied to the HTML file. 
-The content of the first matching tag is made available as a handlebars variable. 
-If the value ends with a bracketed value (`.blog-meta img [src]`) the value of an attribute (`src`) is selected instead.
-If the value is an array, the first entry is a parser function and the second entry a CSS selector.
-The remaining entries are parameters to the parser function.
+The first matching tag is processed as follows:  
+- If the value ends with a bracketed value (`.blog-meta img [src]`) the result is the value of an attribute (`src`).
+- If the value ends with a bracketed dot value (`div [.left]`) the result is if the tag has the given CSS class.
+- If the value is an array, the first entry is a parser function and the second entry a CSS selector. 
+ The remaining entries are parameters to the parser function. 
+ The result is the tag's content applied to the parser function. 
+- Otherwise, the result is the content of the tag.
+ 
 `static` contains static strings.
 
 `_templates/output.html` is the template to be used to generate output.

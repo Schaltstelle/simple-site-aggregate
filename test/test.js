@@ -14,20 +14,20 @@ before(() => {
 
 describe('aggregate', () => {
     it('should gather data from file', () => {
-        fse.removeSync('test/cache');
-        return index.run('../test/agg-input.html', 'file', 'test/agg-template.html').then(res => {
+        fse.removeSync('_work');
+        return index.run('../test/agg-input.html', 'test/parsers/file.json', 'test/agg-template.html').then(res => {
             assert.equal(res, fs.readFileSync('test/expected-file-agg.html', 'utf8'));
         });
     });
     it('should gather data from url', () => {
-        fse.removeSync('test/cache');
-        return index.run('http://en.wikipedia.org', 'wikipedia', 'test/agg-template.html').then(res => {
+        fse.removeSync('_work');
+        return index.run('http://en.wikipedia.org', 'test/parsers/wikipedia.json', 'test/agg-template.html').then(res => {
             assert.equal(res, fs.readFileSync('test/expected-url-agg.html', 'utf8'));
         });
     });
     it('should work as a helper', () => {
-        fse.removeSync('test/cache');
-        return ss.templateString('{{{aggregate "../test/agg-input.html" "file" "test/agg-template.html"}}}', {}).then(res => {
+        fse.removeSync('_work');
+        return ss.templateString('{{{aggregate "../test/agg-input.html" "test/parsers/file.json" "test/agg-template.html"}}}', {}).then(res => {
             assert.equal(res, fs.readFileSync('test/expected-file-agg.html', 'utf8'));
         });
     });

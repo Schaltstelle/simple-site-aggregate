@@ -32,15 +32,15 @@ function run(url, parser, templ, maxLen) {
 }
 
 function doRun(url, parser, templ, maxLen, config) {
-    fse.mkdirsSync(config.cacheDir);
-    const parsers = readParsers(config.parserDir);
+    let cacheDir='_work';
+    fse.mkdirsSync(cacheDir);
     const templateFile = fs.readFileSync(templ, 'utf8');
     debug('Searching', chalk.blue(url));
-    let cache = path.resolve(config.cacheDir, filenameSafe(url));
+    let cache = path.resolve(cacheDir, filenameSafe(url));
     let doLoad = fs.existsSync(cache) ? readFile(cache) : load(url, config.outputDir);
     return doLoad.then(data => {
         fs.writeFileSync(cache, data);
-        let info = parse(url, data, parsers[parser], maxLen);
+        let info = parse(url, data, findParser(parser), maxLen);
         return ss.templateString(templateFile, info);
     });
 }
@@ -62,14 +62,12 @@ function readFile(file) {
     });
 }
 
-function readParsers(dir) {
-    let res = {};
-    fs.readdirSync(dir).forEach(file => {
-        if (file.substring(file.length - 5) === '.json') {
-            res[file.substring(0, file.length - 5)] = JSON.parse(fs.readFileSync(path.resolve(dir, file), 'utf8'));
-        }
-    });
-    return res;
+let parsers = {};
+function findParser(parser) {
+    if (!parsers[parser]) {
+        parsers[parser] = JSON.parse(fs.readFileSync(parser, 'utf8'));
+    }
+    return parsers[parser];
 }
 
 function load(addr, baseDir, count) {

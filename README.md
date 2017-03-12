@@ -8,17 +8,17 @@ A [simple-site](https://github.com/Schaltstelle/simple-site) plugin that aggrega
 ## Installation
 Install with `npm install -g simple-site-aggregate`. 
 
-Add `_config/plugins/index.js` containing the line `require('simple-site-aggregate');`.
+Add `_plugins/index.js` containing the line `require('simple-site-aggregate');`.
 
 ## Usage
 Aggregate a page using a handlebars tag:
 ```
-{{{aggregate "http://my-site/my-page.html" "my-site" "_config/templates/output.html" 300}}}
+{{{aggregate "http://my-site/my-page.html" "_parsers/my-site.json" "_templates/output.html" 300}}}
 ```
 
 `http://my-site/my-page.html` is the page that should be aggregated.
 
-`my-site` refers to the file `_config/parsers/my-site.json` which defines how to extract data from the HTML file:
+`_parsers/my-site.json` defines how to extract data from the HTML file:
 ```json
 {
     "selectors": {
@@ -44,7 +44,7 @@ If the value is an array, the first entry is a parser function and the second en
 The remaining entries are parameters to the parser function.
 `static` contains static strings.
 
-`_config/templates/output.html` is the template to be used.
+`_templates/output.html` is the template to be used to generate output.
 
 `300` is an optional value defining the maximum length of the values.
  

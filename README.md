@@ -3,42 +3,48 @@
 [![codecov](https://codecov.io/gh/Schaltstelle/simple-site-aggregate/graph/badge.svg)](https://codecov.io/gh/Schaltstelle/simple-site-aggregate)
 [![License](https://img.shields.io/badge/License-Apache%202.0-yellowgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Aggregate html snippets from other pages.
+A [simple-site](https://github.com/Schaltstelle/simple-site) plugin that aggregates html snippets from other pages.
+
+## Installation
+Install with `npm install -g simple-site-aggregate`. 
+
+Add `_config/plugins/index.js` containing the line `require('simple-site-aggregate');`.
 
 ## Usage
-Install with `npm install -g html-aggregator`.
+Aggregate a page using a handlebars tag:
+```
+{{{aggregate "http://my-site/my-page.html" "my-site" "_config/templates/output.html" 300}}}
+```
 
-Run with `html-aggregator --templateDir=<directory> --output=<file> --maxLen=<number> input files...`.
+`http://my-site/my-page.html` is the page that should be aggregated.
 
-`templateDir` contains json files that define how to extract data from HTML files:
-````json
+`my-site` refers to the file `_config/parsers/my-site.json` which defines how to extract data from the HTML file:
+```json
 {
     "selectors": {
         "title": "header.post-header h1",
-        "content": "article.post-content"
+        "content": "article.post-content",
+        "image": ".blog-meta img [src]",
+        "published": [
+            "parseDate",
+            "span.date",
+            "DD.MM.YYYY"
+        ]
     },
     "static": {
         "name": "My Name"
     }
 }
-````
+```
 
-The values in `selectors` are CSS selectors that are applied to the input HTML files. `static` contains static strings.
+The values in `selectors` are CSS selectors that are applied to the HTML file. 
+The content of the first matching tag is made available as a handlebars variable. 
+If the value ends with a bracketed value (`.blog-meta img [src]`) the value of an attribute (`src`) is selected instead.
+If the value is an array, the first entry is a parser function and the second entry a CSS selector.
+The remaining entries are parameters to the parser function.
+`static` contains static strings.
 
-`output` is a file defining how to render the scraped data:
-````HTML
-<h1>%title%</h1>
-<div>By %name%</div>
-<div>%content%</div>
-````
-The variables defined in a template are referenced by the expression`%var%`.
+`_config/templates/output.html` is the template to be used.
 
-For every occurrence of `<aggregate url="..." template="..."></aggregate>` in every input file
-- the contents of the given URL is fetched
-- the contents is parsed with the given template
-- if the input file name has the form `<name>.html.<ext>`  
-  
-  a new file `<name>.html` is created where all `<aggregate>`s are replaced by the `output` file having its variables replaced.
-  
-  Otherwise, `<aggregate>`'s child nodes are replaced with the `output` file having its variables replaced.
-     
+`300` is an optional value defining the maximum length of the values.
+ 

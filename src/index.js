@@ -41,7 +41,7 @@ function doRun(url, parser, templ, maxLen, config) {
     return doLoad.then(data => {
         fs.writeFileSync(cache, data);
         let info = parse(url, data, findParser(parser), maxLen);
-        return ss.templateString(templateFile, info);
+        return ss.template(templateFile, info).then(res => res.data);
     });
 }
 
@@ -55,7 +55,7 @@ function readFile(file) {
             if (err) {
                 reject(err);
             } else {
-                debug('Found', chalk.magenta(path.relative('', file)));
+                debug('Found', chalk.green(path.relative('', file)));
                 resolve(data);
             }
         })
@@ -169,7 +169,7 @@ function relative(href, base) {
 }
 
 function get(addr) {
-    debug('Loading', chalk.magenta(addr));
+    debug('Loading', chalk.green(addr));
     return new Promise((resolve, reject) => {
         let options = {
             url: addr,

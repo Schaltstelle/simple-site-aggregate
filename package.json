@@ -4,6 +4,10 @@
   "license": "Apache-2.0",
   "version": "0.0.2",
   "private": false,
+  "author": {
+    "name": "Stefan Niederhauser",
+    "email": "ich@nidi.guru"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Schaltstelle/simple-site-aggregate.git"
@@ -21,7 +25,7 @@
     "fs-extra": "2.0.0",
     "moment": "2.17.1",
     "request": "2.81.0",
-    "simple-site": "^0.1.2"
+    "simple-site": "0.1.4"
   },
   "devDependencies": {
     "istanbul": "0.4.5",

@@ -27,21 +27,25 @@ function registerParser(name, func) {
     parseFuncs[name] = func;
 }
 
-function run(url, parser, templ, maxLen) {
-    return doRun(url, parser, templ, maxLen, ss.configs);
+function run(url, parser, templ, maxLen, config) {
+    if (!config) {
+        config = maxLen;
+        maxLen = 0;
+    }
+    return doRun(url, parser, templ, maxLen, ss.configs.outputDir, config.hash);
 }
 
-function doRun(url, parser, templ, maxLen, config) {
+function doRun(url, parser, templ, maxLen, outputDir, config) {
     let cacheDir = '_work';
     fse.mkdirsSync(cacheDir);
     const templateFile = fs.readFileSync(templ, 'utf8');
     debug('Searching', chalk.blue(url));
     let cache = path.resolve(cacheDir, filenameSafe(url));
-    let doLoad = fs.existsSync(cache) ? readFile(cache) : load(url, config.outputDir);
+    let doLoad = fs.existsSync(cache) ? readFile(cache) : load(url, outputDir);
     return doLoad.then(data => {
         fs.writeFileSync(cache, data);
         let info = parse(url, data, findParser(parser), maxLen);
-        return ss.template(templateFile, info).then(res => res.data);
+        return ss.template(templateFile, Object.assign(info, config)).then(res => res.data);
     });
 }
 

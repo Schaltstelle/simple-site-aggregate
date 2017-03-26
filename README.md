@@ -13,28 +13,23 @@ Add `_plugins/index.js` containing the line `require('simple-site-aggregate');`.
 ## Usage
 Aggregate a page using a handlebars tag:
 ```
-{{{aggregate "http://my-site/my-page.html" "_parsers/my-site.json" "_templates/output.html" 300}}}
+{{{aggregate "http://my-site/my-page.html" "_parsers/my-site.yaml" "_templates/output.html" 300}}}
 ```
 
 `http://my-site/my-page.html` is the page that should be aggregated.
 
-`_parsers/my-site.json` defines how to extract data from the HTML file:
-```json
-{
-    "selectors": {
-        "title": "header.post-header h1",
-        "content": "article.post-content",
-        "image": ".blog-meta img [src]",
-        "published": [
-            "parseDate",
-            "span.date",
-            "DD.MM.YYYY"
-        ]
-    },
-    "static": {
-        "name": "My Name"
-    }
-}
+`_parsers/my-site.yaml` defines how to extract data from the HTML file:
+```yaml
+selectors:
+    title: header.post-header h1
+    content: article.post-content
+    image: .blog-meta img [src]
+    published:
+        - parseDate
+        - span.date
+        - DD.MM.YYYY
+static:
+    name: My Name
 ```
 
 The values in `selectors` are CSS selectors that are applied to the HTML file. 

@@ -1,0 +1,4 @@
+selectors:
+  content: span.mw-headline
+  stat: .notExisting
+static: !include test/parsers/inc.yaml

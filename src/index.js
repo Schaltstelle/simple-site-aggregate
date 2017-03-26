@@ -32,7 +32,7 @@ function run(url, parser, templ, maxLen, config) {
         config = maxLen;
         maxLen = 0;
     }
-    return doRun(url, parser, templ, maxLen, ss.configs.outputDir, config.hash);
+    return doRun(url, parser, templ, maxLen, ss.configs.outputDir, config ? config.hash : {});
 }
 
 function doRun(url, parser, templ, maxLen, outputDir, config) {
@@ -69,7 +69,7 @@ function readFile(file) {
 let parsers = {};
 function findParser(parser) {
     if (!parsers[parser]) {
-        parsers[parser] = JSON.parse(fs.readFileSync(parser, 'utf8'));
+        parsers[parser] = ss.loadYaml(fs.readFileSync(parser, 'utf8'));
     }
     return parsers[parser];
 }
@@ -98,7 +98,10 @@ function parse(addr, data, template, maxLen) {
     const tags = cheerio.load(data);
     let info = Object.assign({url: addr}, template.static);
     for (let select in template.selectors) {
-        info[select] = applySelector(addr, tags, template.selectors[select], maxLen);
+        let value = applySelector(addr, tags, template.selectors[select], maxLen);
+        if (value != null) {
+            info[select] = value;
+        }
     }
     return info;
 }
@@ -129,7 +132,7 @@ function extract(addr, tags, selector, maxLen) {
         let tag = tags(css);
         if (tag.length === 0) {
             debug(chalk.red('tag "' + css + '" not found.'));
-            return '';
+            return null;
         }
         if (attr.charAt(0) === '.') {
             return tag.hasClass(attr.substring(1));
@@ -140,7 +143,12 @@ function extract(addr, tags, selector, maxLen) {
         }
         return val;
     }
-    return convertToHtml(addr, tags(selector), maxLen);
+    let tag = tags(selector);
+    if (tag.length === 0) {
+        debug(chalk.red('tag "' + selector + '" not found.'));
+        return null;
+    }
+    return convertToHtml(addr, tag, maxLen);
 }
 
 function convertToHtml(addr, elems, maxLen) {

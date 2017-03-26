@@ -1,0 +1,9 @@
+selectors:
+  content: div.content
+  isMore: div.content [.more]
+  date:
+    - parseDate
+    - span [date]
+    - DD.MM.YYYY
+static:
+  stat: static

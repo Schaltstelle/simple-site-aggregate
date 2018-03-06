@@ -72,7 +72,7 @@ function readFile(file) {
 let parsers = {};
 function findParser(parser) {
     if (!parsers[parser]) {
-        parsers[parser] = ss.loadYaml(fs.readFileSync(parser, 'utf8'));
+        parsers[parser] = ss.loadYamlSync(fs.readFileSync(parser, 'utf8'));
     }
     return parsers[parser];
 }

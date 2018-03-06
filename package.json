@@ -25,7 +25,7 @@
     "fs-extra": "2.0.0",
     "moment": "2.21.0",
     "request": "2.81.0",
-    "simple-site": "^0.1.12"
+    "simple-site": "^0.1.13"
   },
   "devDependencies": {
     "istanbul": "0.4.5",

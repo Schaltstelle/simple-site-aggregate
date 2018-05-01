@@ -41,15 +41,31 @@ function doRun(url, parser, templ, maxLen, config) {
         fse.removeSync(cacheDir);
     }
     fse.mkdirsSync(cacheDir);
-    const templateFile = fs.readFileSync(templ, 'utf8');
     debug('Searching', chalk.blue(url));
     let cache = path.resolve(cacheDir, filenameSafe(url));
     let doLoad = fs.existsSync(cache) ? readFile(cache) : load(url, ss.configs.outputDir);
     return doLoad.then(data => {
         fs.writeFileSync(cache, data);
         let info = parse(url, data, findParser(parser), maxLen);
-        return ss.template(templateFile, Object.assign(info, config)).then(res => res.data);
+        let context = Object.assign(info, config);
+        return Promise.all(templatePromises(templ, context)).then(res => {
+            let nonEmpty = res.filter(r => r);
+            return nonEmpty.length === 0 ? '' : nonEmpty[0];
+        });
     });
+}
+
+function templatePromises(templ, context) {
+    let templates = typeof templ === 'string' ? {[templ]: ''} : templ;
+    let promises = [];
+    for (let p in templates) {
+        promises.push(execTemplate(fs.readFileSync(p, 'utf8'), context, templates[p]));
+    }
+    return promises;
+}
+
+function execTemplate(file, context, target) {
+    return ss.template(file, context).then(res => target ? fs.writeFileSync(target, res.data) : res.data);
 }
 
 function filenameSafe(s) {
@@ -70,6 +86,7 @@ function readFile(file) {
 }
 
 let parsers = {};
+
 function findParser(parser) {
     if (!parsers[parser]) {
         parsers[parser] = ss.loadYamlSync(fs.readFileSync(parser, 'utf8'));

@@ -25,6 +25,13 @@ describe('aggregate', () => {
             assert.equal(res, fs.readFileSync('test/expected-url-agg.html', 'utf8'));
         });
     });
+    it('should support a map as output', () => {
+        fse.removeSync('_work');
+        return index.run('../test/agg-input.html', 'test/parsers/file.yaml', {'test/agg-template.html': '_work/out.html'}).then(res => {
+            assert.equal(res, '');
+            assert.equal(fs.readFileSync('_work/out.html', 'utf8'), fs.readFileSync('test/expected-file-agg.html', 'utf8'));
+        });
+    });
     it('should work as a helper', () => {
         fse.removeSync('_work');
         return ss.template('{{{aggregate "../test/agg-input.html" "test/parsers/file.yaml" "test/agg-template.html"}}}', {}).then(res => {

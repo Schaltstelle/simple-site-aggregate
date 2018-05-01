@@ -187,8 +187,16 @@ function extract(addr, tags, selector, maxLen) {
             return tag.hasClass(attr.substring(1));
         }
         let val = tag.attr(attr);
-        if (tag.get(0).tagName === 'img' && attr === 'src') {
-            val = relative(val, addr);
+        if (!val) {
+            debug(chalk.red('attribute "' + attr + '" not found on tag "' + css + '".'));
+            return null;
+        }
+        if (tag.get(0).tagName === 'img') {
+            if (attr === 'src') {
+                val = relative(val, addr);
+            } else if (attr === 'srcset') {
+                val = relative(val, addr); //TODO support it correctly
+            }
         }
         return val;
     }

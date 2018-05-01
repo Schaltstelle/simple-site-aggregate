@@ -27,6 +27,14 @@ function registerParser(name, func) {
     parseFuncs[name] = func;
 }
 
+/**
+ * @param url The URL to fetch data
+ * @param parser The parser file to use
+ * @param templ The output template to use. May be an object {outputFile: template...}
+ * @param maxLen Max length of data to be fetched, if it's longer, it will be truncated at </p>
+ * @param config Additional data given to the template
+ * @returns {*}
+ */
 function run(url, parser, templ, maxLen, config) {
     if (!config) {
         config = maxLen;
@@ -56,10 +64,14 @@ function doRun(url, parser, templ, maxLen, config) {
 }
 
 function templatePromises(templ, context) {
-    let templates = typeof templ === 'string' ? {[templ]: ''} : templ;
+    let templates = typeof templ === 'string' ? templ[0] === '{' ? ss.loadYamlSync(templ) : {[templ]: null} : templ;
     let promises = [];
     for (let p in templates) {
-        promises.push(execTemplate(fs.readFileSync(p, 'utf8'), context, templates[p]));
+        if (!templates[p]) {
+            templates[''] = p;
+            p = '';
+        }
+        promises.push(execTemplate(fs.readFileSync(templates[p], 'utf8'), context, p));
     }
     return promises;
 }

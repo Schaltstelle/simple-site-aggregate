@@ -91,6 +91,7 @@ function execTemplate(file, context, target) {
         if (target) {
             fse.mkdirsSync(path.dirname(target));
             fs.writeFileSync(target, res.data);
+            debug('Wrote', chalk.blue(url));
         } else {
             return res.data;
         }

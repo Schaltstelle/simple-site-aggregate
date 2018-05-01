@@ -43,28 +43,38 @@ function run(url, parser, templ, maxLen, config) {
     return doRun(url, parser, templ, maxLen, config ? config.hash : {});
 }
 
-function doRun(url, parser, templ, maxLen, config) {
-    let cacheDir = '_work';
-    if (ss.configs.clean) {
-        fse.removeSync(cacheDir);
-    }
-    fse.mkdirsSync(cacheDir);
-    debug('Searching', chalk.blue(url));
-    let cache = path.resolve(cacheDir, filenameSafe(url));
-    let doLoad = fs.existsSync(cache) ? readFile(cache) : load(url, ss.configs.outputDir);
-    return doLoad.then(data => {
-        fs.writeFileSync(cache, data);
-        let info = parse(url, data, findParser(parser), maxLen);
-        let context = Object.assign(info, config);
-        return Promise.all(templatePromises(templ, context)).then(res => {
-            let nonEmpty = res.filter(r => r);
-            return nonEmpty.length === 0 ? '' : nonEmpty[0];
+function doRun(_url, _parser, _templ, maxLen, config) {
+    return resolveArgs(_url, _parser, _templ, config).then(params => {
+        let [url, parser, templ] = params;
+        let cacheDir = '_work';
+        if (ss.configs.clean) {
+            fse.removeSync(cacheDir);
+        }
+        fse.mkdirsSync(cacheDir);
+        debug('Searching', chalk.blue(url));
+        let cache = path.resolve(cacheDir, filenameSafe(url));
+        let doLoad = fs.existsSync(cache) ? readFile(cache) : load(url, ss.configs.outputDir);
+        return doLoad.then(data => {
+            fs.writeFileSync(cache, data);
+            let info = parse(url, data, findParser(parser), maxLen);
+            let context = Object.assign(info, config);
+            return Promise.all(templatePromises(templ, context)).then(res => {
+                let nonEmpty = res.filter(r => r);
+                return nonEmpty.length === 0 ? '' : nonEmpty[0];
+            });
         });
     });
 }
 
+function resolveArgs(url, parser, templ, config) {
+    return Promise.all([
+        ss.template(url, config).then(res => res.data),
+        ss.template(parser, config).then(res => res.data),
+        ss.template(templ, config).then(res => res.data)]);
+}
+
 function templatePromises(templ, context) {
-    let templates = typeof templ === 'string' ? templ[0] === '{' ? ss.loadYamlSync(templ) : {[templ]: null} : templ;
+    let templates = templ[0] === '{' ? ss.loadYamlSync(templ) : {[templ]: null};
     let promises = [];
     for (let p in templates) {
         if (!templates[p]) {

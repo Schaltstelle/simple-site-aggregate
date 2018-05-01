@@ -77,7 +77,14 @@ function templatePromises(templ, context) {
 }
 
 function execTemplate(file, context, target) {
-    return ss.template(file, context).then(res => target ? fs.writeFileSync(target, res.data) : res.data);
+    return ss.template(file, context).then(res => {
+        if (target) {
+            fse.mkdirsSync(path.dirname(target));
+            fs.writeFileSync(target, res.data);
+        } else {
+            return res.data;
+        }
+    });
 }
 
 function filenameSafe(s) {

@@ -34,9 +34,9 @@ describe('aggregate', () => {
     });
     it('should work as a helper', () => {
         fse.removeSync('_work');
-        return ss.template('{{{aggregate "../test/agg-input.html" "test/parsers/file.yaml" "{test/agg-template.html,_work/out.html: test/agg-template.html}" }}}', {}).then(res => {
+        return ss.template('{{{aggregate "../test/agg-input.html" "test/parsers/file.yaml" "{test/agg-template.html,_work/bla/out.html: test/agg-template.html}" }}}', {}).then(res => {
             assert.equal(res.data, fs.readFileSync('test/expected-file-agg.html', 'utf8'));
-            assert.equal(fs.readFileSync('_work/out.html', 'utf8'), fs.readFileSync('test/expected-file-agg.html', 'utf8'));
+            assert.equal(fs.readFileSync('_work/bla/out.html', 'utf8'), fs.readFileSync('test/expected-file-agg.html', 'utf8'));
         });
     });
 });

@@ -27,6 +27,14 @@ function registerParser(name, func) {
     parseFuncs[name] = func;
 }
 
+/**
+ * @param url The URL to fetch data
+ * @param parser The parser file to use
+ * @param templ The output template to use. May be an object {outputFile: template...}
+ * @param maxLen Max length of data to be fetched, if it's longer, it will be truncated at </p>
+ * @param config Additional data given to the template
+ * @returns {*}
+ */
 function run(url, parser, templ, maxLen, config) {
     if (!config) {
         config = maxLen;
@@ -35,20 +43,58 @@ function run(url, parser, templ, maxLen, config) {
     return doRun(url, parser, templ, maxLen, config ? config.hash : {});
 }
 
-function doRun(url, parser, templ, maxLen, config) {
-    let cacheDir = '_work';
-    if (ss.configs.clean) {
-        fse.removeSync(cacheDir);
+function doRun(_url, _parser, _templ, maxLen, config) {
+    return resolveArgs(_url, _parser, _templ, config).then(params => {
+        let [url, parser, templ] = params;
+        let cacheDir = '_work';
+        if (ss.configs.clean) {
+            fse.removeSync(cacheDir);
+        }
+        fse.mkdirsSync(cacheDir);
+        debug('Searching', chalk.blue(url));
+        let cache = path.resolve(cacheDir, filenameSafe(url));
+        let doLoad = fs.existsSync(cache) ? readFile(cache) : load(url, ss.configs.outputDir);
+        return doLoad.then(data => {
+            fs.writeFileSync(cache, data);
+            let info = parse(url, data, findParser(parser), maxLen);
+            let context = Object.assign(info, config);
+            return Promise.all(templatePromises(templ, context)).then(res => {
+                let nonEmpty = res.filter(r => r);
+                return nonEmpty.length === 0 ? '' : nonEmpty[0];
+            });
+        });
+    });
+}
+
+function resolveArgs(url, parser, templ, config) {
+    return Promise.all([
+        ss.template(url, config).then(res => res.data),
+        ss.template(parser, config).then(res => res.data),
+        ss.template(templ, config).then(res => res.data)]);
+}
+
+function templatePromises(templ, context) {
+    let templates = templ[0] === '{' ? ss.loadYamlSync(templ) : {[templ]: null};
+    let promises = [];
+    for (let p in templates) {
+        if (!templates[p]) {
+            templates[''] = p;
+            p = '';
+        }
+        promises.push(execTemplate(fs.readFileSync(templates[p], 'utf8'), context, p));
     }
-    fse.mkdirsSync(cacheDir);
-    const templateFile = fs.readFileSync(templ, 'utf8');
-    debug('Searching', chalk.blue(url));
-    let cache = path.resolve(cacheDir, filenameSafe(url));
-    let doLoad = fs.existsSync(cache) ? readFile(cache) : load(url, ss.configs.outputDir);
-    return doLoad.then(data => {
-        fs.writeFileSync(cache, data);
-        let info = parse(url, data, findParser(parser), maxLen);
-        return ss.template(templateFile, Object.assign(info, config)).then(res => res.data);
+    return promises;
+}
+
+function execTemplate(file, context, target) {
+    return ss.template(file, context).then(res => {
+        if (target) {
+            fse.mkdirsSync(path.dirname(target));
+            fs.writeFileSync(target, res.data);
+            debug('Wrote', chalk.blue(target));
+        } else {
+            return res.data;
+        }
     });
 }
 
@@ -70,6 +116,7 @@ function readFile(file) {
 }
 
 let parsers = {};
+
 function findParser(parser) {
     if (!parsers[parser]) {
         parsers[parser] = ss.loadYamlSync(fs.readFileSync(parser, 'utf8'));
@@ -141,8 +188,16 @@ function extract(addr, tags, selector, maxLen) {
             return tag.hasClass(attr.substring(1));
         }
         let val = tag.attr(attr);
-        if (tag.get(0).tagName === 'img' && attr === 'src') {
-            val = relative(val, addr);
+        if (!val) {
+            debug(chalk.red('attribute "' + attr + '" not found on tag "' + css + '".'));
+            return null;
+        }
+        if (tag.get(0).tagName === 'img') {
+            if (attr === 'src') {
+                val = relative(val, addr);
+            } else if (attr === 'srcset') {
+                val = relative(val, addr); //TODO support it correctly
+            }
         }
         return val;
     }

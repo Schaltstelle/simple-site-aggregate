@@ -136,7 +136,7 @@ function load(addr, baseDir, count) {
 
     function retrying(promise) {
         return promise.catch((err) => {
-            debug(chalk.blue(addr) + ': ' + chalk.red(err))
+            debug(chalk.blue(addr), chalk.red(err))
             return new Promise((resolve, reject) => {
                 setTimeout(() => resolve(load(addr, baseDir, (count || 0) + 1)), 500);
             });
@@ -181,7 +181,7 @@ function extract(addr, tags, selector, maxLen) {
         let attr = elem[2];
         let tag = tags(css);
         if (tag.length === 0) {
-            debug(chalk.blue(addr) + ': ' + chalk.red('tag "' + css + '" not found.'))
+            debug(chalk.blue(addr), chalk.red('tag "' + css + '" not found.'))
             return null;
         }
         if (attr.charAt(0) === '.') {
@@ -189,7 +189,7 @@ function extract(addr, tags, selector, maxLen) {
         }
         let val = tag.attr(attr);
         if (!val) {
-            debug(chalk.blue(addr) + ': ' + chalk.red('attribute "' + attr + '" not found on tag "' + css + '".'))
+            debug(chalk.blue(addr), chalk.red('attribute "' + attr + '" not found on tag "' + css + '".'))
             return null;
         }
         if (tag.get(0).tagName === 'img') {
@@ -203,7 +203,7 @@ function extract(addr, tags, selector, maxLen) {
     }
     let tag = tags(selector);
     if (tag.length === 0) {
-        debug(chalk.blue(addr) + ': ' + chalk.red('tag "' + selector + '" not found.'))
+        debug(chalk.blue(addr), chalk.red('tag "' + selector + '" not found.'))
         return null;
     }
     return convertToHtml(addr, tag, maxLen);

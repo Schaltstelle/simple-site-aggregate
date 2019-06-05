@@ -45,18 +45,19 @@ function run(url, parser, templ, maxLen, config) {
 
 function doRun(_url, _parser, _templ, maxLen, config) {
     return resolveArgs(_url, _parser, _templ, config).then(params => {
-        let [url, parser, templ] = params;
+        let [url, parserName, templ] = params;
         let cacheDir = '_work';
         if (ss.configs.clean) {
             fse.removeSync(cacheDir);
         }
         fse.mkdirsSync(cacheDir);
         debug('Searching', chalk.blue(url));
+        let parser = findParser(parserName)
         let cache = path.resolve(cacheDir, filenameSafe(url));
-        let doLoad = fs.existsSync(cache) ? readFile(cache) : load(url, ss.configs.outputDir);
+        let doLoad = fs.existsSync(cache) ? readFile(cache) : load(url, ss.configs.outputDir, parser);
         return doLoad.then(data => {
             fs.writeFileSync(cache, data);
-            let info = parse(url, data, findParser(parser), maxLen);
+            let info = parse(url, data, parser, maxLen);
             let context = Object.assign(info, config);
             return Promise.all(templatePromises(templ, context)).then(res => {
                 let nonEmpty = res.filter(r => r);
@@ -124,7 +125,7 @@ function findParser(parser) {
     return parsers[parser];
 }
 
-function load(addr, baseDir, count) {
+function load(addr, baseDir, parser, count) {
     if (count > 5) {
         return Promise.reject('Too many retries');
     }
@@ -135,12 +136,20 @@ function load(addr, baseDir, count) {
     return retrying(get(addr));
 
     function retrying(promise) {
-        return promise.catch((err) => {
-            debug(chalk.blue(addr), chalk.red(err))
-            return new Promise((resolve, reject) => {
-                setTimeout(() => resolve(load(addr, baseDir, (count || 0) + 1)), 500);
-            });
-        });
+        return promise
+            .then(body => {
+                let failContains = parser.fail && parser.fail.contains
+                if (failContains && body.indexOf(failContains) >= 0) {
+                    return Promise.reject('Contains "' + failContains + '"')
+                }
+                return body
+            })
+            .catch(err => {
+                debug(chalk.blue(addr), chalk.red(err))
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => resolve(load(addr, baseDir, parser, (count || 0) + 1)), 500)
+                })
+            })
     }
 }
 

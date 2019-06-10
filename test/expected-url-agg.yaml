@@ -1,0 +1,6 @@
+url: ../test
+stat: static
+content: Content.
+isMore: true
+date: 2017-05-03T22:00:00.000Z
+parser: test/parsers

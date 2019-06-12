@@ -1,6 +1,6 @@
 url: ../test
 stat: static
-content: Content.
+content: <p>Content.<a href="../test/sub/test.html"></a></p><p>blaj</p>
 isMore: true
 date: 2017-05-04T00:00:00.000Z
 parser: test/parsers

@@ -1,4 +1,5 @@
 selectors:
   content: span.mw-headline
   stat: .notExisting
+  absolute: li#footer-places-about
 static: !include test/parsers/inc.yaml

@@ -213,7 +213,12 @@ function relative(href, base) {
         if (href.substring(0, 1) === '#') {
             rel = base + href
         } else if (href.substring(0, 1) === '/') {
-            rel = base.substring(0, base.indexOf('/', 8)) + href
+            if (base.match('^https?://')) {
+                let end = base.indexOf('/', 8)
+                rel = base.substring(0, end < 0 ? base.length : end) + href
+            } else {
+                rel = href
+            }
         } else {
             rel = base.substring(0, base.lastIndexOf('/') + 1) + href
         }

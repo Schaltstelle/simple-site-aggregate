@@ -1,6 +1,13 @@
 url: ../test
 stat: static
-content: <p>Content.<a href="../test/sub/test.html"></a></p><p>blaj</p>
+content: |2
+
+      <p>Content.
+          <a href="../test/sub/test.html"></a>
+          <a href="/root"></a>
+          <a href="../test/agg-input.html#anchor"></a>
+      </p>
+      <p>blaj</p>
 isMore: true
 date: 2017-05-04T00:00:00.000Z
 parser: test/parsers

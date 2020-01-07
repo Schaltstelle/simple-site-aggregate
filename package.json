@@ -16,7 +16,7 @@
   "scripts": {
     "clean": "rm -r node_modules/simple-site",
     "test": "mocha",
-    "coverage": "istanbul cover _mocha"
+    "coverage": "nyc --reporter=lcov --reporter=text npm run test"
   },
   "dependencies": {
     "chalk": "3.0.0",
@@ -28,7 +28,7 @@
     "simple-site": "^0.1.24"
   },
   "devDependencies": {
-    "istanbul": "0.4.5",
-    "mocha": "5.1.1"
+    "mocha": "7.0.0",
+    "nyc": "15.0.0"
   }
 }
